@@ -1,52 +1,62 @@
-# Design/Features
+# design
 
-## Core Features
+## game logic
 
-- [x] game logic
-  - [x] find piece legal moves
-    - [x] pawn
-    - [x] knight
-    - [x] bishop
-    - [x] rook
-    - [x] king
-    - [x] queen
-  - endgame scenarios
-    - [x]  checkmate
-    - [x]  resignation
-    - [x]  timeout
-    - [x]  draw
-      - [x]  stalemate
-      - [x]  50-move rule
-      - [x]  repetition
-      - [x]  agreement
-      - [x]  insufficient material
-        - [x]  king vs king
-        - [x]  king + minor piece vs king
-        - [x]  king + two knights vs king
-        - [x]  king + minor piece vs king + minor piece
-        - [x]  timeout vs insufficient material
-  - [x] other
-    - [x] castling
-    - [x] pawn promotion
-      - [x] choose piece
-    - [x] check
-- [x] display
-  - [x] draw board & pieces
-  - [x] moves played list
-    - [x] piece + to square
-    - [x] capture
-    - [x] ambiguous piece
-    - [x] castle
-    - [x] check/checkmate
-  - [x] help menu
-- [x] CPU opponent
-  - [x] random moves
-- [x] time control
-- [x] logging
+- board representation
+  - length 81 array
+- legal move generation
+  - piece movement
+    - pawn
+      - en passant
+      - promotion
+    - knight
+    - bishop
+    - rook
+    - king
+      - castling
+    - queen
+  - castling
+  - check detection
+- game state management
+  - turn tracking
+  - castling rights
+  - en passant
+- end game scenarios
 
-## Strech Features
+  - checkmate
+  - resignation
+  - timeout
+  - draw
+    - stalemate
+    - 50-move rule
+    - repetition
+    - agreement
+    - insufficient material
+      - king vs king
+      - king + minor piece vs king
+      - king + two knights vs king
+      - king + minor piece vs king + minor piece
+      - timeout vs insufficient material
 
-- [ ] more appealing GUI
-- [ ] Sophisticated CPU opponent (LLM or lichess API)
-- [ ] OS portability
-- [ ] multiplayer over internet
+- FEN/PGN support
+
+## testing
+
+- unit tests
+- integration tests (game scenarios)
+- regression tests
+
+## graphics/user interface
+
+- interactive 2D board rendering with SDL2
+- settings menu for application configuration
+- animation system
+
+## networking
+
+- p2p connection
+
+## modern C++ best practices
+
+- smart pointers for memory management
+- RAII
