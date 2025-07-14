@@ -32,27 +32,26 @@ public:
     add_file_stream(filepath.value());
   }
 
-  void log(const std::string &msg, Level level = Level::INFO)
+  template <typename... Args> void log(Level level, Args &&...args)
   {
     std::stringstream ss;
 
     ss << "[" << make_current_timestamp() << "] ";
-
     ss << level_to_string(level) << ": ";
 
-    ss << msg;
+    (ss << ... << args);
     ss << "\n";
 
     for (std::ostream *os : streams)
     {
       *os << ss.str();
     }
-  };
+  }
 
-  void info(const std::string &msg) { log(msg, Level::INFO); }
-  void warning(const std::string &msg) { log(msg, Level::WARNING); }
-  void error(const std::string &msg) { log(msg, Level::ERROR); }
-  void critical(const std::string &msg) { log(msg, Level::CRITICAL); }
+  template <typename... Args> void info(Args &&...args) { log(Level::INFO, std::forward<Args>(args)...); }
+  template <typename... Args> void warning(Args &&...args) { log(Level::WARNING, std::forward<Args>(args)...); }
+  template <typename... Args> void error(Args &&...args) { log(Level::ERROR, std::forward<Args>(args)...); }
+  template <typename... Args> void critical(Args &&...args) { log(Level::CRITICAL, std::forward<Args>(args)...); }
 
   void add_file_stream(const std::string &filepath)
   {
