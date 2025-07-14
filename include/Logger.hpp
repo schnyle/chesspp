@@ -1,10 +1,14 @@
 #pragma once
 
 #include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
+#include <vector>
 
 enum class Level
 {
@@ -17,16 +21,16 @@ enum class Level
 class Logger
 {
 public:
-  Logger(const std::string &filepath, const bool stdout = true) : log_to_stdout(stdout)
+  // expects directory of input filepath to exist
+  Logger(std::optional<std::string> filepath = std::nullopt)
   {
-    ostream = std::ofstream(filepath);
-    if (!ostream)
+    if (!filepath.has_value())
     {
-      throw std::runtime_error("Error opening logfile: " + filepath);
+      filepath = make_xdg_filepath();
     }
-  }
 
-  ~Logger() { ostream.close(); }
+    add_file_stream(filepath.value());
+  }
 
   void log(const std::string &msg, Level level = Level::INFO)
   {
@@ -39,10 +43,9 @@ public:
     ss << msg;
     ss << "\n";
 
-    ostream << ss.str();
-    if (log_to_stdout)
+    for (std::ostream *os : streams)
     {
-      std::cout << ss.str();
+      *os << ss.str();
     }
   };
 
@@ -51,9 +54,23 @@ public:
   void error(const std::string &msg) { log(msg, Level::ERROR); }
   void critical(const std::string &msg) { log(msg, Level::CRITICAL); }
 
+  void add_file_stream(const std::string &filepath)
+  {
+    auto file_stream = std::make_unique<std::ofstream>(filepath);
+    if (!file_stream->is_open())
+    {
+      throw std::runtime_error("Error opening logfile: " + filepath);
+    }
+
+    streams.push_back(file_stream.get());
+    file_streams.push_back(std::move(file_stream));
+  }
+
+  void add_stream(std::ostream &os) { streams.push_back(&os); }
+
 private:
-  std::ofstream ostream;
-  bool log_to_stdout;
+  std::vector<std::ostream *> streams = {};                      // all streams to write logs
+  std::vector<std::unique_ptr<std::ofstream>> file_streams = {}; // ofstreams that need ownership
 
   std::string level_to_string(Level level)
   {
@@ -82,6 +99,14 @@ private:
     std::strftime(time_string, timestamp_size, "%Y-%m-%d %H:%M:%S", timeinfo);
 
     return std::string(time_string);
+  }
+
+  std::string make_xdg_filepath()
+  {
+    const char *home = std::getenv("HOME");
+    const std::string suffix = "/.local/share/chesspp/log/";
+    std::filesystem::create_directories(std::string(home) + suffix);
+    return std::string(home) + suffix + "test.log"; // TODO: change filename
   }
 };
 
