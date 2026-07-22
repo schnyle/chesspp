@@ -1,57 +1,44 @@
-# Chesspp - Modern C++ Chess Engine & CLI Application
+# chesspp — Chess rules engine & CLI
 
-## Overview
+A complete chess rules engine and terminal application in C++17, with a threaded time-control system and a unit-test suite under GoogleTest. Play against another human or a CPU that makes random legal moves.
 
-A command-line chess application demonstrating modern C++ programming practices, concurrent system design, and algorithmic problem-solving. This project showcases modern software engineering principles through a complete chess engine implementation with a CPU opponent, built using C++17 standards and best practices.
+## Features
 
-## Technical Highlights
+**Full rules engine**
 
-### Modern C++ Design Patterns & Practices
+- Legal move generation for all pieces, including pins and check evasion
+- Castling, en passant, and pawn promotion (with piece selection)
+- Check and checkmate detection
+- All draw conditions: stalemate, the 50-move rule, threefold repetition, and insufficient material (including the king-and-minor-piece and two-knight cases), plus draw by agreement
 
-- **RAII (Resource Acquisition is Initialization)**: Comprehensive smart pointer usage throughout the codebase with `std::unique_ptr` for automatic memory management.
-- **Strong Type Safety**: Custom type-safe wrappers (`RangedInt`, `BoardIndex`, `FileRankIndex`) preventing invalid state and runtime errors.
-- **Exception Safety**: Robust error handling with custom exception types and RAII guarantees
-- **Move Semantics**: Efficient resource management with proper move constructors and assignment operators
+**Notation & I/O**
 
-### Concurrent Programming and Multithreading
+- FEN parsing — construct any position from a FEN string
+- Algebraic-notation move output with disambiguation, capture, castling, and check/checkmate annotation
+- PGN game logging
 
-- **Thread-Safe Timer System**: Custom `ChessTimer` class using `std::atomic`, `std::mutex`, and `std::condition_variable` for precise time control
-- **Asynchronous Input Handling**: Non-blocking user input system with thread synchronization
-- **Lock-Free Programming**: Atomic operations for game state management across threads
-- **Producer-Consumer Pattern**: Coordinated communication between game logic, timer, and input threads
+**Representation & type safety**
 
-### Memory Management & Performance
+- Contiguous `std::array<ChessPiece, 64>` board representation
+- `enum class`-based piece and color types
+- Type-safe index wrappers (`RangedInt`, `BoardIndex`, `FileRankIndex`) that validate their range on construction and assignment, making out-of-bounds board access unrepresentable
 
-- **Zero Memory Leaks**: Complete RAII implementation with smart pointers and automatic cleanup
-- **Efficient Data Structures**: `std::array` for fixed-size board representation, `std::unordered_map` with custom hash functions for position tracking
-- **Cache-Friendly Design**: Contiguous memory layout for board representation
+**Concurrency**
 
-### Testing & Quality Assurance
+- A dedicated timer thread and a non-blocking input thread run alongside the game loop
+- The `ChessTimer` coordinates state with `std::atomic`, `std::mutex`, and `std::condition_variable`, and cleans up its thread via RAII
 
-- **Comprehensive Unit Testing**: Thorough unit testing with Google Test framework covering edge cases and game scenarios
-- **Mocking & Dependency Testing**: Friend class testing pattern for private method validation
-- **Automated Testing Pipeline**: CMake integration with CTest for continuous testing
+**Opponent**
 
-## System Design Highlights
+- The CPU plays random legal moves (uniform selection over legal moves) — this is a rules engine, not a searching/evaluating chess AI. A stronger opponent is a possible future extension.
 
-### Configurable Management
+**Configuration**
 
-- **External Configuration**: File-based configuration system with type-safe parsing
-- **Runtime Flexibility**: Configurable time controls, player types, and game parameters
+- File-based configuration for time controls, player types, and CPU move delay
 
-### Rendering System
+## Build & run
 
-- **Modular Display Architecture**: Separation of game logic and presentation layers
-- **ASCII Art Rendering**: Custom frame builder for terminal-based chess board visualization
-- **Real-time Updates**: Dynamic board state rendering with move history
-
-### Input/Output System
-
-- **Raw Terminal Mode**: Low-level terminal control for responsive user interaction
-- **Cross-platform Compatibility**: POSIX-compliant terminal handling
-- **Algebraic Notation**: Standard chess notation parsing and generation
-
-## Build & Run
+Requires a C++17 compiler, CMake 3.28+. GoogleTest is fetched automatically.
 
 ```bash
 git clone --recursive https://github.com/schnyle/chesspp.git
@@ -62,14 +49,10 @@ make
 ./chess
 ```
 
-## Testing
+## Tests
 
-```
+```bash
 ctest --verbose
 ```
 
-### Requirements
-
-- **Compiler**: C++17 compatible (GCC 7+, Clang 5+, MSVC 2017+)
-- **Build System** CMake 3.28+
-- **Testing**: Google Test (automatically fetched)
+The suite covers move generation, piece behavior, rendering, and utilities (friend-class access is used to test internals).
